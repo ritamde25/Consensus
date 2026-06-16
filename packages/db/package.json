@@ -7,7 +7,8 @@
     ".": "./index.ts"
   },
   "scripts": {
-    "seed": "bun run seed.ts"
+    "seed": "bun run seed.ts",
+    "generate": "prisma generate"
   },
   "devDependencies": {
     "@types/bun": "latest",
