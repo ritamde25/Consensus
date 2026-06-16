@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: consensus
+    runtime: node
+    plan: free
+    buildCommand: bun install && bun run build && bun run --cwd packages/db migrate:deploy
+    startCommand: bun run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BUN_VERSION
+        value: 1.3.14
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_API_URL
+        value: ""
