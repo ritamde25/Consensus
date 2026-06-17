@@ -237,7 +237,7 @@ export function OrderBook({
   }
 
   return (
-    <Card className="border-border/30 h-full">
+    <Card className="h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-sm font-semibold">

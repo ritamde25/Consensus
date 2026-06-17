@@ -31,9 +31,13 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="h-9 w-9 rounded-lg bg-linear-to-br from-accent to-accent-hover flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-xl group-hover:shadow-accent/30 group-hover:-translate-y-0.5 transition-all duration-300">
-              <span className="text-white font-bold text-lg">C</span>
-            </div>
+          <div className="h-9 w-9 rounded-lg flex items-center justify-center overflow-hidden">
+            <img
+              src="..\..\assets\trade-favicon.png"
+              alt="Logo"
+              className="h-6 w-6 object-contain"
+            />
+          </div>
             <span className="text-lg font-bold text-primary-text hidden sm:block gradient-text">
               Consensus
             </span>

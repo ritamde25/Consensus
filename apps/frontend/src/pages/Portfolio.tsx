@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BalanceCard, PositionTable, HistoryTable, EmptyState } from '@/components'
 import { Button } from '@/components/ui/button'
 import { useBalance, usePositions, useTradeHistory } from '@/hooks'
@@ -78,16 +78,16 @@ export function Portfolio() {
 
   return (
     <PageContainer>
-      <Stack spacing={6}>
-        {/* Header (compact + functional) */}
+      <Stack spacing={8}>
+        {/* Header */}
         <PageHeader
           title="Portfolio"
           description="Your positions and activity"
           actions={
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 onClick={() => openModal('deposit')}
-                className="h-9 text-xs"
+                className="h-10 text-xs font-medium shadow-lg shadow-accent/25 hover:shadow-accent/40"
               >
                 Deposit
               </Button>
@@ -95,7 +95,7 @@ export function Portfolio() {
               <Button
                 variant="outline"
                 onClick={() => openModal('withdraw')}
-                className="h-9 text-xs"
+                className="h-10 text-xs font-medium"
               >
                 Withdraw
               </Button>
@@ -123,28 +123,32 @@ export function Portfolio() {
         </ContentGrid>
 
         {/* Main panel */}
-        <div className="border border-border bg-surface rounded-md">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-            {/* compact segmented control */}
-            <div className="border-b border-border p-2">
-              <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent">
-                <TabsTrigger value="positions" className="text-xs">
+        <div className="border border-border/60 bg-surface/95 rounded-xl shadow-lg overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            {/* Modern tab selector with cleaner design */}
+            <div className="border-b border-border/40 bg-surface-2/50">
+              <TabsList className="grid grid-cols-2 h-11 w-full bg-transparent border-0 shadow-none p-0">
+                <TabsTrigger value="positions" className="text-sm font-medium data-[state=active]:bg-surface/80 data-[state=active]:text-text data-[state=active]:border-b-2 data-[state=active]:border-accent/60 data-[state=active]:shadow-sm rounded-none transition-all duration-200 hover:bg-surface/60">
                   Positions
                 </TabsTrigger>
-                <TabsTrigger value="history" className="text-xs">
+                <TabsTrigger value="history" className="text-sm font-medium data-[state=active]:bg-surface/80 data-[state=active]:text-text data-[state=active]:border-b-2 data-[state=active]:border-accent/60 data-[state=active]:shadow-sm rounded-none transition-all duration-200 hover:bg-surface/60">
                   History
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <div className="p-3">
-              <TabsContent value="positions">
-                <PositionTable positions={positions ?? []} />
-              </TabsContent>
+            <div className="p-6">
+              {activeTab === 'positions' && (
+                <div key="positions" className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <PositionTable positions={positions ?? []} />
+                </div>
+              )}
 
-              <TabsContent value="history">
-                <HistoryTable trades={history ?? []} />
-              </TabsContent>
+              {activeTab === 'history' && (
+                <div key="history" className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <HistoryTable trades={history ?? []} />
+                </div>
+              )}
             </div>
           </Tabs>
         </div>

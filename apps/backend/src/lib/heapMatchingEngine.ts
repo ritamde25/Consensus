@@ -169,23 +169,51 @@ async function executeBuy(
 
   if (trades.length > 0) tx.trade.createMany({ data: trades });
 
-  for(const u of makerOrderUpdates)
-    await tx.order.update({ where: { id: u.id }, data: { remaining: u.remaining, status: u.status } });
+  await Promise.all(
+    makerOrderUpdates.map(u =>
+      tx.order.update({
+        where: { id: u.id },
+        data: { remaining: u.remaining, status: u.status },
+      })
+    )
+  );
 
-  for (const u of makerBalanceUpdates){
-    u.isMakerSellYes
-    ? await tx.user.update({ where: { id: u.userId }, data: { usdBalance: { increment: u.amount } } })
-    : await tx.user.update({ where: { id: u.userId }, data: { lockedBalance: { decrement: u.amount } } })
-  }
+  await Promise.all(
+    makerBalanceUpdates.map((u) =>
+      u.isMakerSellYes
+        ? tx.user.update({
+            where: { id: u.userId },
+            data: { usdBalance: { increment: u.amount } },
+          })
+        : tx.user.update({
+            where: { id: u.userId },
+            data: { lockedBalance: { decrement: u.amount } },
+          })
+    )
+  );
 
 
-  for (const u of makerPositionUpdates)
-    await tx.position.update({
-      where: { userId_marketId: { userId: u.userId, marketId } },
-      data: u.isMakerSellYes
-        ? { lockedYesShares: { decrement: u.quantity }, totalSpent: { decrement: u.proceeds } }
-        : { noShares: { increment: u.quantity }, totalSpent: { increment: u.proceeds } },
-    });
+  await Promise.all(
+    makerPositionUpdates.map((u) =>
+      tx.position.update({
+        where: {
+          userId_marketId: {
+            userId: u.userId,
+            marketId,
+          },
+        },
+        data: u.isMakerSellYes
+          ? {
+              lockedYesShares: { decrement: u.quantity },
+              totalSpent: { decrement: u.proceeds },
+            }
+          : {
+              noShares: { increment: u.quantity },
+              totalSpent: { increment: u.proceeds },
+            },
+      })
+    )
+  );
 
   const buyRefund = price * filledQty - totalAmount;
   const remaining = quantity - filledQty;
@@ -302,24 +330,50 @@ async function executeSell(
 
   if (trades.length > 0) await tx.trade.createMany({ data: trades });
 
-  for(const u of makerOrderUpdates)
-    await tx.order.update({ where: { id: u.id }, data: { remaining: u.remaining, status: u.status } });
-
-  for (const u of makerBalanceUpdates){
-    u.isMakerBuyYes
-    ? await tx.user.update({ where: { id: u.userId }, data: { lockedBalance: { decrement: u.amount } } })
-    : await tx.user.update({ where: { id: u.userId }, data: { usdBalance: { increment: u.amount } } });
-  }
-
-
-  for (const u of makerPositionUpdates) {
-    await tx.position.update({
-      where: { userId_marketId: { userId: u.userId, marketId } },
-      data: u.isMakerBuyYes
-        ? { yesShares: { increment: u.quantity }, totalSpent: { increment: u.proceeds } }
-        : { lockedNoShares:  { decrement: u.quantity }, totalSpent: { decrement: u.proceeds } },
-    });
-  }
+  await Promise.all(
+    makerOrderUpdates.map((u) =>
+      tx.order.update({
+        where: { id: u.id },
+        data: { remaining: u.remaining, status: u.status },
+      })
+    )
+  );
+  
+  await Promise.all(
+    makerBalanceUpdates.map((u) =>
+      u.isMakerBuyYes
+        ? tx.user.update({
+            where: { id: u.userId },
+            data: { lockedBalance: { decrement: u.amount } },
+          })
+        : tx.user.update({
+            where: { id: u.userId },
+            data: { usdBalance: { increment: u.amount } },
+          })
+    )
+  );
+  
+  await Promise.all(
+    makerPositionUpdates.map((u) =>
+      tx.position.update({
+        where: {
+          userId_marketId: {
+            userId: u.userId,
+            marketId,
+          },
+        },
+        data: u.isMakerBuyYes
+          ? {
+              yesShares: { increment: u.quantity },
+              totalSpent: { increment: u.proceeds },
+            }
+          : {
+              lockedNoShares: { decrement: u.quantity },
+              totalSpent: { decrement: u.proceeds },
+            },
+      })
+    )
+  );
 
   const buyRefund = price * filledQty - totalAmount;
   const remaining = quantity - filledQty;

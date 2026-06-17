@@ -33,9 +33,11 @@ export function MarketCard({ market }: MarketCardProps) {
       <Card
         className="
           h-full
-          border-border/30
-          hover:border-border/50
-          hover:shadow-lg
+          border-border/60
+          bg-surface/90
+          hover:border-accent/40
+          hover:shadow-xl
+          hover:-translate-y-1
           transition-all
           duration-300
           overflow-hidden

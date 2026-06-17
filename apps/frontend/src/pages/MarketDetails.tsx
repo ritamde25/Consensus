@@ -10,7 +10,7 @@ import {
   MarketTrading,
   MarketAnalysisCard,
 } from '@/components'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageContainer, Stack } from '@/components/layout'
 import { formatCents } from '@/lib/utils'
 import { TrendingUp, Activity, Layers, Clock } from 'lucide-react'
@@ -255,32 +255,40 @@ export function MarketDetails() {
           <div className="lg:col-span-1">
             <Stack spacing={4}>
               {canTrade ? (
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-                  {/* Segmented control (no heavy tab UI) */}
-                  <TabsList className="grid grid-cols-2 w-full h-9">
-                    <TabsTrigger value="trade" className="text-xs">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  {/* Modern segmented control style */}
+                  <TabsList className="grid grid-cols-2 h-11 w-full bg-surface-2/50 border border-border/40 rounded-lg p-1 gap-1">
+                    <TabsTrigger value="trade" className="text-sm font-medium data-[state=active]:bg-surface data-[state=active]:text-text data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/30 transition-all duration-200 rounded-md hover:bg-surface/80">
                       Trade
                     </TabsTrigger>
-                    <TabsTrigger value="positions" className="text-xs">
+                    <TabsTrigger value="positions" className="text-sm font-medium data-[state=active]:bg-surface data-[state=active]:text-text data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/30 transition-all duration-200 rounded-md hover:bg-surface/80">
                       Positions
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="trade" className="mt-4">
-                    <MarketTrading
-                      marketId={market.id}
-                      orderbook={orderbook || null}
-                      selectedOrder={selectedOrder}
-                      onOrderSelected={setSelectedOrder}
-                    />
-                  </TabsContent>
+                  <div className="mt-4">
+                    <div className="min-h-[400px]">
+                      {activeTab === 'trade' && (
+                        <div key="trade" className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <MarketTrading
+                            marketId={market.id}
+                            orderbook={orderbook || null}
+                            selectedOrder={selectedOrder}
+                            onOrderSelected={setSelectedOrder}
+                          />
+                        </div>
+                      )}
 
-                  <TabsContent value="positions" className="mt-4">
-                    <MarketPositions
-                      positions={userPositions || []}
-                      marketId={market.id}
-                    />
-                  </TabsContent>
+                      {activeTab === 'positions' && (
+                        <div key="positions" className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <MarketPositions
+                            positions={userPositions || []}
+                            marketId={market.id}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </Tabs>
               ) : (
                 <div className="border border-border bg-surface rounded-md p-4 space-y-2">

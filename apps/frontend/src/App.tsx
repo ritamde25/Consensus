@@ -18,12 +18,20 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="p-4 rounded-full bg-linear-to-br from-surface to-surface-elevated border border-border/50 shadow-xl animate-pulse">
+      <div className="flex min-h-screen items-center justify-center relative overflow-hidden bg-background">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-surface to-background opacity-100" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-accent/3 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/2 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <div className="p-4 rounded-full bg-gradient-to-br from-surface to-surface-elevated border border-border/50 shadow-xl animate-pulse">
             <Sparkles className="h-8 w-8 text-accent" />
           </div>
-          <div className="text-secondary-text font-semibold">Loading...</div>
+          <div className="text-text-secondary font-semibold">Loading...</div>
         </div>
       </div>
     )
@@ -32,35 +40,45 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-background">
-          {isAuthenticated && <Navbar />}
-          <Routes>
-            <Route
-              path="/login"
-              element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/"
-              element={isAuthenticated ? <Markets /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/market/:id"
-              element={isAuthenticated ? <MarketDetails /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/portfolio"
-              element={isAuthenticated ? <Portfolio /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/create"
-              element={isAuthenticated ? <CreateMarket /> : <Navigate to="/login" />}
-            />
-          </Routes>
-          <DepositModal />
-          <WithdrawModal />
-          <SplitModal />
-          <MergeModal />
-          <Toaster position="bottom-right" theme="dark" />
+        <div className="min-h-screen relative overflow-hidden bg-background">
+          {/* Animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-surface to-background opacity-100" />
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-accent/3 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/2 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+
+          <div className="relative z-10">
+            {isAuthenticated && <Navbar />}
+            <Routes>
+              <Route
+                path="/login"
+                element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
+              />
+              <Route
+                path="/"
+                element={isAuthenticated ? <Markets /> : <Navigate to="/login" />}
+              />
+              <Route
+                path="/market/:id"
+                element={isAuthenticated ? <MarketDetails /> : <Navigate to="/login" />}
+              />
+              <Route
+                path="/portfolio"
+                element={isAuthenticated ? <Portfolio /> : <Navigate to="/login" />}
+              />
+              <Route
+                path="/create"
+                element={isAuthenticated ? <CreateMarket /> : <Navigate to="/login" />}
+              />
+            </Routes>
+            <DepositModal />
+            <WithdrawModal />
+            <SplitModal />
+            <MergeModal />
+            <Toaster position="bottom-right" theme="dark" />
+          </div>
         </div>
       </BrowserRouter>
     </QueryClientProvider>
