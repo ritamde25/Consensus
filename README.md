@@ -1,165 +1,317 @@
-You can mention in README:
+<div align="center">
 
-future work: margin + collateralized shorting
-future work: portfolio-level risk engine
-future work: partial netting across markets
+<img src="apps/frontend/assets/trade-favicon.png" alt="Consensus Logo" width="120"/>
 
-# Turborepo starter
+# Consensus
 
-This Turborepo starter is maintained by the Turborepo core team.
+**A High-Performance Prediction Market Platform**
 
-## Using this example
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.3-white)](https://bun.sh/)
+[![Express](https://img.shields.io/badge/Express-5.2-green)](https://expressjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-PostgreSQL-2e3e8e)](https://www.prisma.io/)
 
-Run the following command:
+<!-- Screenshot placeholder -->
+<!-- 
+![Platform Screenshot](path/to/screenshot.png)
+*A clean, intuitive interface for trading prediction markets*
+-->
 
-```sh
-npx create-turbo@latest
+</div>
+
+## 🎯 Overview
+
+Consensus is a sophisticated prediction market platform featuring a high-performance order matching engine, real-time trade execution, and comprehensive portfolio management. The system is designed with a focus on backend architecture, financial integrity, and low-latency order processing.
+
+### Key Features
+
+- **High-Performance Matching Engine**: In-memory order book using heap-based data structures for O(1) order insertion and O(log n) retrieval
+- **Binary Outcome Markets**: Trade YES/NO positions on prediction markets with price discovery mechanisms
+- **Real-time Settlement**: Automated market resolution with instantaneous payout calculation
+- **Position Management**: Advanced portfolio tracking with locked/unlocked share states
+- **AI-Powered Analysis**: Integrated market analysis using Google's Gemini AI
+- **Secure Authentication**: JWT-based authentication via Supabase
+
+---
+
+## 🏗️ System Architecture
+
+### Backend Design Philosophy
+
+The backend is built around several core architectural principles:
+
+1. **Performance-First Design**: Critical trading operations are optimized for minimal latency
+2. **Financial Integrity**: Strict transactional guarantees ensure no funds or shares are lost
+3. **Scalability**: In-memory order books with database persistence for durability
+4. **Modular Components**: Clean separation between matching, settlement, and authentication
+
+### Core Components
+
+<details>
+<summary><b>🔧 Order Matching Engine</b></summary>
+
+The heart of the system is the **Heap-based Matching Engine** (`apps/backend/src/lib/heapMatchingEngine.ts`) which implements:
+
+- **In-Memory Order Books**: Uses binary heaps for O(log n) order matching operations
+- **Price-Time Priority**: Orders are matched based on best price, then by creation time
+- **Normalised Pricing**: Converts all orders to YES-equivalent prices for unified matching
+- **Hot Path Optimization**: Matching happens in-memory before database persistence for minimal latency
+- **Async Persistence**: Database writes happen after response to ensure fast user experience
+
+Key Design Decisions:
+- BUY YES and SELL NO are both treated as "BUY" operations on YES price
+- SELL YES and BUY NO are both treated as "SELL" operations on YES price
+- Partial fills are supported with automatic order status updates
+- Maker updates happen asynchronously to avoid blocking trade execution
+
+</details>
+
+<details>
+<summary><b>💰 Settlement Engine</b></summary>
+
+The **Settlement Engine** (`apps/backend/src/lib/settlementEngine.ts`) handles market resolution:
+
+- **Order Cancellation**: Automatically cancels all open orders when markets resolve
+- **Collateral Release**: Returns locked funds and shares to users
+- **Payout Calculation**: Distributes winnings based on final outcome (100 cents per winning share)
+- **Transactional Safety**: All settlement operations happen in a single database transaction
+
+Settlement Process:
+1. Verify market exists and is unresolved
+2. Cancel all OPEN/PARTIAL orders with collateral return
+3. Calculate payouts for winning positions
+4. Update user balances
+5. Mark market as resolved
+
+</details>
+
+<details>
+<summary><b>🔐 Authentication & Security</b></summary>
+
+**JWT-Based Authentication** (`apps/backend/src/middlewares/auth.middleware.ts`):
+
+- Uses Supabase JWT verification with JWKS (JSON Web Key Set)
+- Automatic user provisioning on first login
+- Transaction-safe user balance initialization
+- User identification via `req.userId` in protected routes
+
+Security Features:
+- All protected routes require valid JWT tokens
+- Database-level row locking for balance operations
+- Atomic transactions prevent double-spending
+- Separation of available vs locked balances
+
+</details>
+
+<details>
+<summary><b>📊 Database Schema</b></summary>
+
+**PostgreSQL with Prisma ORM** (`packages/db/prisma/schema.prisma`):
+
+Core Models:
+- **User**: Account balances (USD/locked), position tracking
+- **Market**: Prediction markets with resolution deadlines
+- **Order**: Order book entries with normalised pricing for matching
+- **Trade**: Execution history with maker/taker details
+- **Position**: User holdings per market with locked/unlocked states
+- **MarketAnalysis**: AI-generated market insights with caching
+
+Key Design Patterns:
+- Normalised pricing for efficient order matching
+- Separate locked/unlocked balances for pending orders
+- Composite indexes for optimal query performance
+- Transaction-safe status updates
+
+</details>
+
+---
+
+## 🚀 API Architecture
+
+### RESTful Endpoints
+
+#### Market Operations
+- `GET /markets` - List all markets
+- `GET /markets/:id` - Get market details with order book and user positions
+- `POST /markets/create` - Create new prediction market
+- `GET /markets/:id/analysis` - Get AI-powered market analysis (cached)
+
+#### Order Management
+- `POST /orders/order` - Place limit orders (BUY/SELL YES/NO)
+- `POST /orders/split` - Split position (buy equal YES/NO shares)
+- `POST /orders/merge` - Merge position (sell equal YES/NO shares)
+
+#### Portfolio Management
+- `GET /portfolio/balance` - Get USD and locked balances
+- `GET /portfolio/positions` - Get all user positions
+- `GET /portfolio/history` - Get trade history
+- `POST /portfolio/deposit` - Add funds to account
+- `POST /portfolio/withdraw` - Withdraw funds
+
+#### Administration
+- `PATCH /admin/updateMarket/:id` - Update market details
+- `DELETE /admin/updateMarket/:id` - Delete market
+- `POST /admin/settleMarket/:id` - Resolve market with final outcome
+- `GET /admin/settlementDetails/:id` - Get settlement breakdown
+
+---
+
+## 💻 Technology Stack
+
+### Backend
+- **Runtime**: Bun 1.3 (high-performance JavaScript runtime)
+- **Framework**: Express 5.2 (REST API server)
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Supabase JWT + jose library
+- **Validation**: Zod schemas for type-safe input validation
+- **AI Integration**: Google Gemini 2.5 Flash for market analysis
+
+### Frontend
+- **Framework**: Next.js with React
+- **Styling**: Tailwind CSS
+- **Authentication**: Supabase Auth
+
+### Development
+- **Package Manager**: Bun workspaces
+- **Build System**: Turborepo for monorepo management
+- **Language**: TypeScript 5.9 (strict mode)
+- **Code Quality**: ESLint, Prettier
+
+---
+
+## 📁 Project Structure
+
+```
+consensus/
+├── apps/
+│   ├── backend/              # Express API server
+│   │   ├── src/
+│   │   │   ├── controllers/  # Route handlers (market, orders, portfolio, admin)
+│   │   │   ├── lib/          # Core business logic (matching, settlement engines)
+│   │   │   ├── middlewares/  # Auth middleware
+│   │   │   ├── orderbook/    # Heap-based order book implementation
+│   │   │   ├── types/        # TypeScript types and Zod schemas
+│   │   │   └── utils/        # Market analysis utilities
+│   │   └── package.json
+│   └── frontend/             # Next.js application
+├── packages/
+│   ├── db/                   # Prisma schema and client
+│   ├── eslint-config/        # Shared ESLint configuration
+│   ├── typescript-config/    # Shared TypeScript configuration
+│   └── ui/                   # Shared React components
+└── package.json              # Root package.json
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🛠️ Development
 
-### Apps and Packages
+### Prerequisites
+- Bun 1.3+
+- PostgreSQL database
+- Supabase project (for authentication)
+- Google Gemini API key (for market analysis)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Setup
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+1. **Install dependencies**:
+```bash
+bun install
 ```
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-bun dlx turbo build
-bun exec turbo build
+2. **Configure environment variables**:
+Create `.env` file in `apps/backend/`:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/consensus"
+SUPABASE_URL="your-supabase-url"
+GEMINI_API_KEY="your-gemini-api-key"
+PORT=3000
+NODE_ENV="development"
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+3. **Set up database**:
+```bash
+cd packages/db
+bun prisma migrate dev
+bun prisma generate
 ```
 
-Without global `turbo`:
+4. **Run development servers**:
+```bash
+# Run both backend and frontend
+bun dev
 
-```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
+# Or run individually
+cd apps/backend && bun dev
+cd apps/frontend && bun dev
 ```
 
-### Develop
+### Building for Production
 
-To develop all apps and packages, run the following command:
+```bash
+# Build all packages
+bun run build
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+# Start production server
+bun start
 ```
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo dev
-bun exec turbo dev
-bun exec turbo dev
-```
+## 🔍 Key Design Decisions
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### Order Matching Strategy
+**Why Heap-Based Order Books?**
+- O(1) insertion for market orders
+- O(log n) retrieval for best price execution
+- Efficient price-time priority matching
+- Memory-efficient for large order books
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+### Normalised Pricing
+**Why Convert to YES-Equivalent Prices?**
+- Unifies matching logic across all order types
+- Simplifies price comparison (always looking for best YES price)
+- Reduces edge cases in matching algorithm
+- Enables efficient cross-outcome arbitrage detection
 
-```sh
-turbo dev --filter=web
-```
+### Async Maker Updates
+**Why Update Makers Asynchronously?**
+- Minimizes latency for taker (active trader)
+- Improves user experience with faster responses
+- Maintains data integrity through database transactions
+- Allows batch processing of multiple maker updates
 
-Without global `turbo`:
+### Transaction Safety
+**Why Row-Level Locking?**
+- Prevents race conditions in balance updates
+- Ensures atomicity of complex operations
+- Prevents double-spending and negative balances
+- Serializable isolation for financial operations
 
-```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
-```
+---
 
-### Remote Caching
+## 🚧 Future Enhancements
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+- **Margin Trading**: Leverage positions with collateral requirements
+- **Portfolio Risk Engine**: Real-time risk assessment across positions
+- **Partial Netting**: Cross-market position netting for efficiency
+- **WebSocket Integration**: Real-time order book updates
+- **Advanced Order Types**: Limit orders, stop-loss, iceberg orders
+- **Market Making Bot**: Automated liquidity provision
+- **Performance Optimization**: Redis caching for frequently accessed data
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+---
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## 📄 License
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+This project is proprietary software. All rights reserved.
 
-```sh
-cd my-turborepo
-turbo login
-```
+---
 
-Without global `turbo`, use your package manager:
+## 🤝 Contributing
 
-```sh
-cd my-turborepo
-npx turbo login
-bun exec turbo login
-bun exec turbo login
-```
+Contributions are welcome! Please follow the existing code style and architecture patterns when making changes.
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+---
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-bun exec turbo link
-bun exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+**Built with ❤️ using TypeScript, Bun, and modern backend architecture principles**
