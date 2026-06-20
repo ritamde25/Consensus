@@ -57,6 +57,17 @@ export class Heap<T> {
     return out;
   }
 
+  toSortedSlice(predicate: (node: HeapNode<T>) => boolean): T[] {
+    return this.data
+      .filter(predicate)
+      .sort((a, b) => {
+        if (this.comparator(a, b)) return -1;
+        if (this.comparator(b, a)) return 1;
+        return 0;
+      })
+      .map((n) => n.value);
+  }
+
   private bubbleUp(i: number): void {
     const node = this.data[i];
 

@@ -22,6 +22,10 @@ type UpdateTakerParams = {
 
 const books = new Map<string, OrderBook>();
 
+export function resetBooks() {
+  books.clear();
+}
+
 export async function hydrateAllBooks() {
   const openOrders = await prisma.order.findMany({
     where: { status: { in: ["OPEN", "PARTIAL"] } },
@@ -83,10 +87,11 @@ export async function placeOrder(params: PlaceOrderParams): Promise<PlaceOrderRe
   if (quantity <= 0) throw new Error("Quantity must be positive");
 
   return prisma.$transaction(async (tx) => {
-    const [user] = await tx.$queryRaw<any[]>`SELECT * FROM "User" WHERE id = ${userId} FOR UPDATE`;
+    const [[user], market] = await Promise.all([
+      tx.$queryRaw<any[]>`SELECT * FROM "User" WHERE id = ${userId} FOR UPDATE`,
+      tx.market.findUnique({ where: { id: marketId } }),
+    ]);
     if (!user) throw new Error("User not found");
-
-    const market = await tx.market.findUnique({ where: { id: marketId } });
     if (!market) throw new Error("Market not found");
     if (market.isResolved) throw new Error("Market already resolved");
 

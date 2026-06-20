@@ -14,12 +14,16 @@ export class OrderBook {
       a.value.createdAt.getTime() < b.value.createdAt.getTime())
   );
 
+  private deletedIds = new Set<string>();
+
   insert(order: EngineOrder) {
     const node = {
       key: order.normalizedPrice,
       time: order.createdAt.getTime(),
       value: order,
     };
+
+    this.deletedIds.delete(order.id);
 
     order.normalizedSide === "BUY"
       ? this.bids.insert(node)
@@ -29,28 +33,16 @@ export class OrderBook {
   getCandidates(isBuy: boolean, limitPrice: number): EngineOrder[] {
     const heap = isBuy ? this.asks : this.bids;
 
-    return heap
-      .toSortedArray()
-      .map((n) => n.value)
-      .filter((o) =>
-        isBuy
-          ? o.normalizedPrice <= limitPrice
-          : o.normalizedPrice >= limitPrice
-      );
+    return heap.toSortedSlice(
+      (n) =>
+        !this.deletedIds.has(n.value.id) &&
+        (isBuy
+          ? n.value.normalizedPrice <= limitPrice
+          : n.value.normalizedPrice >= limitPrice)
+    );
   }
 
-  remove(orderId: string, side: "BUY" | "SELL"): void {
-    const heap = side === "BUY" ? this.bids : this.asks;
-    // Note: This is a simple removal that requires rebuilding the heap
-    // In production, you might want a more efficient approach
-    const filtered = heap
-      .toSortedArray()
-      .filter((n) => n.value.id !== orderId);
-    
-    // Clear and reinsert
-    (heap as any).data = [];
-    for (const node of filtered) {
-      heap.insert(node);
-    }
+  remove(orderId: string, _side: "BUY" | "SELL"): void {
+    this.deletedIds.add(orderId);
   }
 }

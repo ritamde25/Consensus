@@ -1,0 +1,125 @@
+========================================================
+  Consensus Benchmark Suite
+  Engine: heap
+========================================================
+🧱 Setup: 300 users, market, positions …
+✅ Setup complete
+
+═══ Phase 1: Microbenchmark (in-memory, no DB) ═══
+
+  [100] getCandidates (no match):  0.0036 ms
+  [100] getCandidates (match):     0.0078 ms
+  [100] remove × 100:            0.0019 ms ea
+
+  [1000] getCandidates (no match):  0.0144 ms
+  [1000] getCandidates (match):     0.0595 ms
+  [1000] remove × 100:            0.0007 ms ea
+
+  [5000] getCandidates (no match):  0.0320 ms
+  [5000] getCandidates (match):     0.2496 ms
+  [5000] remove × 100:            0.0003 ms ea
+
+═══ Phase 2: Latency at depth (DB + matching engine) ═══
+
+--- Depth: 100 resting orders (engine=heap) ---
+  Seeding 135 orders …
+  Seeded in 8.3 s
+  placeOrder depth=100: avg=604.6  p95=714.1  p99=765.6  n=30
+
+--- Depth: 500 resting orders (engine=heap) ---
+  Seeding 535 orders …
+  Seeded in 33.7 s
+  placeOrder depth=500: avg=633.8  p95=722.2  p99=813.7  n=30
+
+═══ Phase 3: Concurrent throughput ═══
+═══ Phase 2: Latency at depth (DB + matching engine) ═══
+
+--- Depth: 100 resting orders (engine=heap) ---
+  Seeding 135 orders …
+  Seeded in 8.3 s
+  placeOrder depth=100: avg=604.6  p95=714.1  p99=765.6  n=30
+
+--- Depth: 500 resting orders (engine=heap) ---
+  Seeding 535 orders …
+  Seeded in 33.7 s
+  placeOrder depth=500: avg=633.8  p95=722.2  p99=813.7  n=30
+
+═══ Phase 3: Concurrent throughput ═══
+  Seeded in 8.3 s
+  placeOrder depth=100: avg=604.6  p95=714.1  p99=765.6  n=30
+
+--- Depth: 500 resting orders (engine=heap) ---
+  Seeding 535 orders …
+  Seeded in 33.7 s
+  placeOrder depth=500: avg=633.8  p95=722.2  p99=813.7  n=30
+
+═══ Phase 3: Concurrent throughput ═══
+
+  Seeding 250 orders …
+  Seeded in 33.7 s
+  placeOrder depth=500: avg=633.8  p95=722.2  p99=813.7  n=30
+
+═══ Phase 3: Concurrent throughput ═══
+
+  Seeding 250 orders …
+
+═══ Phase 3: Concurrent throughput ═══
+
+  Seeding 250 orders …
+═══ Phase 3: Concurrent throughput ═══
+
+  Seeding 250 orders …
+
+  Seeding 250 orders …
+  Seeded in 15.8 s
+  Round 1: 10 orders in 604 ms → 16.5 orders/sec
+  Round 2: 10 orders in 747 ms → 13.4 orders/sec
+  Round 3: 10 orders in 774 ms → 12.9 orders/sec
+  Round 4: 10 orders in 762 ms → 13.1 orders/sec
+  ─── Average: 13.99 orders/sec ───
+
+
+
+
+========================================================
+  Consensus Benchmark Suite
+  Engine: legacy
+========================================================
+🧱 Setup: 300 users, market, positions …
+✅ Setup complete
+
+═══ Phase 1: Microbenchmark (in-memory, no DB) ═══
+
+  [100] getCandidates (no match):  0.0027 ms
+  [100] getCandidates (match):     0.0116 ms
+  [100] remove × 100:            0.0052 ms ea
+
+  [1000] getCandidates (no match):  0.0185 ms
+  [1000] getCandidates (match):     0.0563 ms
+  [1000] remove × 100:            0.0005 ms ea
+
+  [5000] getCandidates (no match):  0.0330 ms
+  [5000] getCandidates (match):     0.2601 ms
+  [5000] remove × 100:            0.0006 ms ea
+
+═══ Phase 2: Latency at depth (DB + matching engine) ═══
+
+--- Depth: 100 resting orders (engine=legacy) ---
+  Seeding 135 orders …
+  Seeded in 9.0 s
+  placeOrder depth=100: avg=862.8  p95=885.1  p99=889.4  n=30
+
+--- Depth: 500 resting orders (engine=legacy) ---
+  Seeding 535 orders …
+  Seeded in 34.7 s
+  placeOrder depth=500: avg=851.6  p95=867.3  p99=870.8  n=30
+
+═══ Phase 3: Concurrent throughput ═══
+
+  Seeding 250 orders …
+  Seeded in 17.5 s
+  Round 1: 10 orders in 3956 ms → 2.5 orders/sec
+  Round 2: 10 orders in 3959 ms → 2.5 orders/sec
+  Round 3: 10 orders in 3935 ms → 2.5 orders/sec
+  Round 4: 10 orders in 3990 ms → 2.5 orders/sec
+  ─── Average: 2.53 orders/sec ───
